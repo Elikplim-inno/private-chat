@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -51,6 +52,15 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				chat: {
+					bg: 'hsl(var(--chat-bg))',
+					'message-sent': 'hsl(var(--message-sent))',
+					'message-received': 'hsl(var(--message-received))',
+					'message-sent-text': 'hsl(var(--message-sent-text))',
+					'message-received-text': 'hsl(var(--message-received-text))',
+					'online-status': 'hsl(var(--online-status))',
+					'typing-indicator': 'hsl(var(--typing-indicator))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
