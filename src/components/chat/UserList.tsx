@@ -1,7 +1,11 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Message } from "./ChatLayout";
 import { formatDistanceToNow } from "date-fns";
+import { LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserListProps {
   users: User[];
@@ -18,6 +22,18 @@ export const UserList = ({
   currentUser,
   messages,
 }: UserListProps) => {
+  const { toast } = useToast();
+  
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive"
+      });
+    }
+  };
   const getLastMessage = (userId: string) => {
     const userMessages = messages.filter(
       msg =>
@@ -52,6 +68,15 @@ export const UserList = ({
               <span className="text-xs text-muted-foreground">Online</span>
             </div>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+            title="Sign out"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 

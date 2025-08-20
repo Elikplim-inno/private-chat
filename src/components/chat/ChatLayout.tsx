@@ -1,7 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { supabase } from "@/integrations/supabase/client";
+import { AuthForm } from "../auth/AuthForm";
 import { UserList } from "./UserList";
 import { ChatWindow } from "./ChatWindow";
-import { AuthScreen } from "./AuthScreen";
+
+export interface Profile {
+  id: string;
+  user_id: string;
+  full_name: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface User {
   id: string;
@@ -21,7 +31,9 @@ export interface Message {
 }
 
 export const ChatLayout = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [selectedChat, setSelectedChat] = useState<User | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -69,12 +81,56 @@ export const ChatLayout = () => {
     },
   ];
 
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Fetch user profile when authenticated
+        if (session?.user) {
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error fetching profile:', error);
+    } else if (data) {
+      setProfile(data);
+    }
+  };
+
   const sendMessage = (content: string) => {
-    if (!currentUser || !selectedChat) return;
+    if (!user || !selectedChat) return;
 
     const newMessage: Message = {
       id: Date.now().toString(),
-      senderId: currentUser.id,
+      senderId: user.id,
       receiverId: selectedChat.id,
       content,
       timestamp: new Date(),
@@ -85,17 +141,23 @@ export const ChatLayout = () => {
   };
 
   const getChatMessages = (userId: string) => {
-    if (!currentUser) return [];
+    if (!user) return [];
     return messages.filter(
       msg =>
-        (msg.senderId === currentUser.id && msg.receiverId === userId) ||
-        (msg.senderId === userId && msg.receiverId === currentUser.id)
+        (msg.senderId === user.id && msg.receiverId === userId) ||
+        (msg.senderId === userId && msg.receiverId === user.id)
     );
   };
 
-  if (!currentUser) {
-    return <AuthScreen onAuth={setCurrentUser} />;
+  if (!user || !profile) {
+    return <AuthForm />;
   }
+
+  const currentUser: User = {
+    id: user.id,
+    name: profile.full_name,
+    isOnline: true,
+  };
 
   return (
     <div className="flex h-screen bg-chat-bg">
