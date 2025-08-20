@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthForm } from "../auth/AuthForm";
 import { UserList } from "./UserList";
 import { ChatWindow } from "./ChatWindow";
+import { ProfileModal } from "../profile/ProfileModal";
+import chartingBg from "@/assets/charting-bg.jpg";
 
 export interface Profile {
   id: string;
@@ -35,6 +37,7 @@ export const ChatLayout = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [selectedChat, setSelectedChat] = useState<User | null>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -160,13 +163,28 @@ export const ChatLayout = () => {
   };
 
   return (
-    <div className="flex h-screen bg-chat-bg">
+    <div 
+      className="flex h-screen bg-chat-bg relative"
+      style={{
+        backgroundImage: `url(${chartingBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'var(--gradient-overlay-light)'
+        }}
+      />
       <UserList
         users={users}
         selectedUser={selectedChat}
         onUserSelect={setSelectedChat}
         currentUser={currentUser}
         messages={messages}
+        onProfileClick={() => setIsProfileModalOpen(true)}
       />
       <ChatWindow
         selectedUser={selectedChat}
@@ -174,6 +192,15 @@ export const ChatLayout = () => {
         currentUser={currentUser}
         onSendMessage={sendMessage}
       />
+      
+      {profile && (
+        <ProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          profile={profile}
+          onProfileUpdate={setProfile}
+        />
+      )}
     </div>
   );
 };

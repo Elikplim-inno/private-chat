@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import chartingBg from "@/assets/charting-bg.jpg";
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -88,8 +89,22 @@ export const AuthForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-      <Card className="w-full max-w-md shadow-elevated">
+    <div 
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4 relative"
+      style={{
+        backgroundImage: `url(${chartingBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'var(--gradient-overlay-light)'
+        }}
+      />
+      <Card className="w-full max-w-md shadow-elevated relative z-10 backdrop-blur-sm bg-card/95">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-full flex items-center justify-center mb-4">
             <svg

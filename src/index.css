@@ -49,6 +49,8 @@ All colors MUST be HSL.
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(267 100% 74%));
     --gradient-chat: linear-gradient(180deg, hsl(248 50% 98%), hsl(240 30% 96%));
+    --gradient-overlay: linear-gradient(135deg, hsl(262 83% 58% / 0.9), hsl(267 100% 74% / 0.8));
+    --gradient-overlay-light: linear-gradient(135deg, hsl(248 50% 98% / 0.95), hsl(240 30% 96% / 0.9));
     
     /* Shadows */
     --shadow-message: 0 1px 2px hsl(220 13% 91% / 0.5);

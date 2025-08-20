@@ -1,10 +1,11 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
+import { LogOut, User as UserIcon } from "lucide-react";
 import { User, Message } from "./ChatLayout";
 import { formatDistanceToNow } from "date-fns";
-import { LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface UserListProps {
@@ -13,6 +14,7 @@ interface UserListProps {
   onUserSelect: (user: User) => void;
   currentUser: User;
   messages: Message[];
+  onProfileClick: () => void;
 }
 
 export const UserList = ({
@@ -21,10 +23,11 @@ export const UserList = ({
   onUserSelect,
   currentUser,
   messages,
+  onProfileClick,
 }: UserListProps) => {
   const { toast } = useToast();
   
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
@@ -33,6 +36,15 @@ export const UserList = ({
         variant: "destructive"
       });
     }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
   const getLastMessage = (userId: string) => {
     const userMessages = messages.filter(
@@ -53,29 +65,37 @@ export const UserList = ({
   };
 
   return (
-    <div className="w-80 border-r border-border bg-card flex flex-col">
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center space-x-3">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
-              {currentUser.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="font-semibold text-foreground">{currentUser.name}</h2>
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-chat-online-status rounded-full"></div>
-              <span className="text-xs text-muted-foreground">Online</span>
-            </div>
-          </div>
+    <div className="w-80 bg-card/95 backdrop-blur-sm border-r border-border flex flex-col relative z-10">
+      <div className="flex items-center gap-3 p-4 border-b border-border">
+        <Avatar className="w-10 h-10 bg-gradient-to-br from-primary to-primary-glow">
+          <AvatarFallback className="text-primary-foreground font-medium">
+            {getInitials(currentUser.name)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <h2 className="font-semibold text-card-foreground">
+            {currentUser.name}
+          </h2>
+          <Badge variant="secondary" className="text-xs bg-online-status/10 text-online-status border-online-status/20">
+            Online
+          </Badge>
+        </div>
+        <div className="flex gap-1">
           <Button
             variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-            title="Sign out"
+            size="sm"
+            onClick={onProfileClick}
+            className="text-muted-foreground hover:text-primary"
           >
-            <LogOut className="h-4 w-4" />
+            <UserIcon className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className="text-muted-foreground hover:text-destructive"
+          >
+            <LogOut className="w-4 h-4" />
           </Button>
         </div>
       </div>
