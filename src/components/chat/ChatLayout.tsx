@@ -143,6 +143,10 @@ export const ChatLayout = () => {
     setMessages(prev => [...prev, newMessage]);
   };
 
+  const deleteMessage = (messageId: string) => {
+    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+  };
+
   const getChatMessages = (userId: string) => {
     if (!user) return [];
     return messages.filter(
@@ -191,6 +195,7 @@ export const ChatLayout = () => {
         messages={selectedChat ? getChatMessages(selectedChat.id) : []}
         currentUser={currentUser}
         onSendMessage={sendMessage}
+        onDeleteMessage={deleteMessage}
       />
       
       {profile && (

@@ -5,13 +5,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Message } from "./ChatLayout";
 import { formatDistanceToNow } from "date-fns";
-import { Send, MoreVertical } from "lucide-react";
+import { Send, MoreVertical, X } from "lucide-react";
 
 interface ChatWindowProps {
   selectedUser: User | null;
   messages: Message[];
   currentUser: User;
   onSendMessage: (content: string) => void;
+  onDeleteMessage: (messageId: string) => void;
 }
 
 export const ChatWindow = ({
@@ -19,6 +20,7 @@ export const ChatWindow = ({
   messages,
   currentUser,
   onSendMessage,
+  onDeleteMessage,
 }: ChatWindowProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -127,7 +129,7 @@ export const ChatWindow = ({
             return (
               <div
                 key={message.id}
-                className={`flex items-end space-x-2 ${
+                className={`flex items-end space-x-2 group ${
                   isOwn ? "justify-end" : "justify-start"
                 }`}
               >
@@ -138,19 +140,31 @@ export const ChatWindow = ({
                     </AvatarFallback>
                   </Avatar>
                 )}
-                <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-message ${
-                    isOwn
-                      ? "bg-chat-message-sent text-chat-message-sent-text rounded-br-md"
-                      : "bg-chat-message-received text-chat-message-received-text rounded-bl-md"
-                  }`}
-                >
-                  <p className="text-sm">{message.content}</p>
-                  <p className={`text-xs mt-1 ${
-                    isOwn ? "text-chat-message-sent-text/70" : "text-chat-message-received-text/70"
-                  }`}>
-                    {formatDistanceToNow(message.timestamp, { addSuffix: true })}
-                  </p>
+                <div className="relative">
+                  <div
+                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-message ${
+                      isOwn
+                        ? "bg-chat-message-sent text-chat-message-sent-text rounded-br-md"
+                        : "bg-chat-message-received text-chat-message-received-text rounded-bl-md"
+                    }`}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                    <p className={`text-xs mt-1 ${
+                      isOwn ? "text-chat-message-sent-text/70" : "text-chat-message-received-text/70"
+                    }`}>
+                      {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+                    </p>
+                  </div>
+                  {isOwn && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDeleteMessage(message.id)}
+                      className={`absolute -top-2 -left-8 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-destructive/10 hover:bg-destructive/20 text-destructive hover:text-destructive`}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
               </div>
             );
