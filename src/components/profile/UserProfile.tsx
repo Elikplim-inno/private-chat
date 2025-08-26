@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User, Edit, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { Profile } from "../chat/ChatLayout";
-import { Edit2, Save, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserProfileProps {
   profile: Profile;
@@ -16,129 +15,241 @@ interface UserProfileProps {
 
 export const UserProfile = ({ profile, onProfileUpdate }: UserProfileProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [fullName, setFullName] = useState(profile.full_name);
   const [isLoading, setIsLoading] = useState(false);
-  const [editData, setEditData] = useState({
-    full_name: profile.full_name
-  });
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleSave = async () => {
-    if (!editData.full_name.trim()) {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ full_name: fullName })
+        .eq('user_id', profile.user_id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      onProfileUpdate(data);
+      setIsEditing(false);
       toast({
-        title: "Invalid Name",
-        description: "Full name cannot be empty",
-        variant: "destructive"
+        title: "Profile updated",
+        description: "Your profile has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file.",
+        variant: "destructive",
       });
       return;
     }
 
-    setIsLoading(true);
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({
-        full_name: editData.full_name.trim()
-      })
-      .eq('user_id', profile.user_id)
-      .select()
-      .single();
-
-    if (error) {
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
       toast({
-        title: "Update Failed",
-        description: error.message,
-        variant: "destructive"
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
       });
-    } else if (data) {
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${profile.user_id}/avatar.${fileExt}`;
+
+      // Delete existing avatar if it exists
+      if (profile.avatar_url) {
+        const oldPath = profile.avatar_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from('avatars').remove([`${profile.user_id}/${oldPath}`]);
+        }
+      }
+
+      // Upload new avatar
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Update profile with new avatar URL
+      const { data, error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', profile.user_id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
       onProfileUpdate(data);
-      setIsEditing(false);
       toast({
-        title: "Profile Updated",
-        description: "Your profile has been updated successfully"
+        title: "Avatar updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload avatar. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ avatar_url: null })
+        .eq('user_id', profile.user_id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      onProfileUpdate(data);
+      
+      toast({
+        title: "Avatar removed",
+        description: "Your profile picture has been removed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove avatar.",
+        variant: "destructive",
       });
     }
-    
-    setIsLoading(false);
-  };
-
-  const handleCancel = () => {
-    setEditData({ full_name: profile.full_name });
-    setIsEditing(false);
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="text-center">
-        <div className="flex justify-center mb-4">
-          <Avatar className="w-20 h-20 bg-gradient-to-br from-primary to-primary-glow">
-            <AvatarFallback className="text-xl font-semibold text-primary-foreground">
-              {getInitials(profile.full_name)}
-            </AvatarFallback>
+    <div className="space-y-6 p-6">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="relative group">
+          <Avatar className="h-24 w-24">
+            {profile.avatar_url ? (
+              <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
+            ) : (
+              <AvatarFallback className="bg-gradient-to-br from-primary to-primary-glow text-primary-foreground text-2xl">
+                {profile.full_name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            )}
           </Avatar>
-        </div>
-        <CardTitle className="flex items-center justify-center gap-2">
-          User Profile
-          {!isEditing && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
             <Button
               variant="ghost"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-              className="h-8 w-8 p-0"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="text-white hover:text-white hover:bg-transparent"
             >
-              <Edit2 className="w-4 h-4" />
+              {uploading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          {profile.avatar_url && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleAvatarRemove}
+              className="absolute -top-2 -right-2 h-6 w-6 bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full"
+            >
+              <X className="h-3 w-3" />
             </Button>
           )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isEditing ? (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="full_name">Full Name</Label>
-              <Input
-                id="full_name"
-                value={editData.full_name}
-                onChange={(e) => setEditData(prev => ({ ...prev, full_name: e.target.value }))}
-                disabled={isLoading}
-                placeholder="Enter your full name"
-              />
-            </div>
-            <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarUpload}
+            className="hidden"
+          />
+        </div>
+        
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground">{profile.full_name}</h3>
+          <p className="text-sm text-muted-foreground">Member since {new Date(profile.created_at).toLocaleDateString()}</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="fullName">Full Name</Label>
+          {isEditing ? (
+            <Input
+              id="fullName"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Enter your full name"
+            />
+          ) : (
+            <div className="flex items-center justify-between p-2 bg-muted rounded-md">
+              <span className="text-foreground">{profile.full_name}</span>
               <Button
-                onClick={handleSave}
-                disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-primary to-primary-glow"
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsEditing(true)}
               >
-                <Save className="w-4 h-4 mr-2" />
-                {isLoading ? "Saving..." : "Save"}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isLoading}
-                className="flex-1"
-              >
-                <X className="w-4 h-4 mr-2" />
-                Cancel
+                <Edit className="h-4 w-4" />
               </Button>
             </div>
-          </>
-        ) : (
-          <div className="space-y-2">
-            <Label>Full Name</Label>
-            <p className="text-lg font-medium">{profile.full_name}</p>
+          )}
+        </div>
+
+        {isEditing && (
+          <div className="flex space-x-2">
+            <Button
+              onClick={handleSave}
+              disabled={isLoading || !fullName.trim()}
+              className="flex-1"
+            >
+              {isLoading ? "Saving..." : "Save Changes"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditing(false);
+                setFullName(profile.full_name);
+              }}
+            >
+              Cancel
+            </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

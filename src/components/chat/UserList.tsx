@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -67,16 +67,22 @@ export const UserList = ({
   return (
     <div className="w-80 bg-card/95 backdrop-blur-sm border-r border-border flex flex-col relative z-10">
       <div className="flex items-center gap-3 p-4 border-b border-border">
-        <Avatar className="w-10 h-10 bg-gradient-to-br from-primary to-primary-glow">
-          <AvatarFallback className="text-primary-foreground font-medium">
-            {getInitials(currentUser.name)}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="h-12 w-12">
+            {currentUser.avatar ? (
+              <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+            ) : (
+              <AvatarFallback className="bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
+                {getInitials(currentUser.name)}
+              </AvatarFallback>
+            )}
+          </Avatar>
+        </div>
         <div className="flex-1">
           <h2 className="font-semibold text-card-foreground">
             {currentUser.name}
           </h2>
-          <Badge variant="secondary" className="text-xs bg-online-status/10 text-online-status border-online-status/20">
+          <Badge variant="secondary" className="text-xs bg-[hsl(var(--online-status)/0.1)] text-[hsl(var(--online-status))] border-[hsl(var(--online-status)/0.2)]">
             Online
           </Badge>
         </div>
@@ -126,7 +132,7 @@ export const UserList = ({
                     </Avatar>
                     <div
                       className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-card ${
-                        user.isOnline ? "bg-chat-online-status" : "bg-muted"
+                        user.isOnline ? "bg-[hsl(var(--online-status))]" : "bg-muted"
                       }`}
                     ></div>
                   </div>

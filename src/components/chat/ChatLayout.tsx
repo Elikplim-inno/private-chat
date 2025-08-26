@@ -11,6 +11,7 @@ export interface Profile {
   id: string;
   user_id: string;
   full_name: string;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -163,6 +164,7 @@ export const ChatLayout = () => {
   const currentUser: User = {
     id: user.id,
     name: profile.full_name,
+    avatar: profile.avatar_url,
     isOnline: true,
   };
 
