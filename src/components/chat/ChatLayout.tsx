@@ -5,9 +5,11 @@ import { AuthForm } from "../auth/AuthForm";
 import { UserList } from "./UserList";
 import { ChatWindow } from "./ChatWindow";
 import { ProfileModal } from "../profile/ProfileModal";
+import { ContactSync } from "./ContactSync";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import chartingBg from "@/assets/charting-bg.jpg";
+import { useContacts } from "@/hooks/useContacts";
 
 export interface Profile {
   id: string;
@@ -42,6 +44,9 @@ export const ChatLayout = () => {
   const [selectedChat, setSelectedChat] = useState<User | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showContactSync, setShowContactSync] = useState(false);
+  const [contactMatchedUsers, setContactMatchedUsers] = useState<User[]>([]);
+  const { getMatchedUsers } = useContacts(user?.id);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -69,7 +74,8 @@ export const ChatLayout = () => {
     },
   ]);
 
-  const users: User[] = [
+  // Combine demo users with contact-matched users
+  const demoUsers: User[] = [
     {
       id: "user2",
       name: "Sarah Wilson",
@@ -87,6 +93,8 @@ export const ChatLayout = () => {
       isOnline: true,
     },
   ];
+
+  const users: User[] = [...demoUsers, ...contactMatchedUsers];
 
   useEffect(() => {
     // Set up auth state listener
@@ -117,6 +125,29 @@ export const ChatLayout = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const loadContactMatches = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const matched = await getMatchedUsers();
+      const contactUsers = matched.map((match: any) => ({
+        id: match.user_id,
+        name: match.full_name,
+        avatar: match.avatar_url,
+        isOnline: true, // We can enhance this later with real presence
+      }));
+      setContactMatchedUsers(contactUsers);
+    } catch (error) {
+      console.error('Error loading contact matches:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      loadContactMatches();
+    }
+  }, [user?.id]);
 
   const fetchUserProfile = async (userId: string) => {
     const { data, error } = await supabase
@@ -234,6 +265,7 @@ export const ChatLayout = () => {
           currentUser={currentUser}
           messages={messages}
           onProfileClick={() => setIsProfileModalOpen(true)}
+          onContactSyncClick={() => setShowContactSync(true)}
         />
       </div>
       
@@ -255,6 +287,32 @@ export const ChatLayout = () => {
           profile={profile}
           onProfileUpdate={setProfile}
         />
+      )}
+      
+      {showContactSync && user && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-lg max-w-md w-full">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-semibold">Find Friends</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowContactSync(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="p-4">
+              <ContactSync 
+                userId={user.id} 
+                onContactsSync={() => {
+                  loadContactMatches();
+                  setShowContactSync(false);
+                }}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, User as UserIcon, UserPlus } from "lucide-react";
 import { User, Message } from "./ChatLayout";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +15,7 @@ interface UserListProps {
   currentUser: User;
   messages: Message[];
   onProfileClick: () => void;
+  onContactSyncClick?: () => void;
 }
 
 export const UserList = ({
@@ -24,6 +25,7 @@ export const UserList = ({
   currentUser,
   messages,
   onProfileClick,
+  onContactSyncClick,
 }: UserListProps) => {
   const { toast } = useToast();
   
@@ -87,6 +89,16 @@ export const UserList = ({
           </Badge>
         </div>
         <div className="flex gap-1">
+          {onContactSyncClick && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onContactSyncClick}
+              className="text-muted-foreground hover:text-primary"
+            >
+              <UserPlus className="w-4 h-4" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"

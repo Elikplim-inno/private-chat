@@ -16,6 +16,7 @@ interface UserProfileProps {
 export const UserProfile = ({ profile, onProfileUpdate }: UserProfileProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(profile.full_name);
+  const [phoneNumber, setPhoneNumber] = useState((profile as any).phone_number || '');
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -26,7 +27,10 @@ export const UserProfile = ({ profile, onProfileUpdate }: UserProfileProps) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .update({ full_name: fullName })
+        .update({ 
+          full_name: fullName,
+          phone_number: phoneNumber || null
+        })
         .eq('user_id', profile.user_id)
         .select()
         .single();
@@ -229,6 +233,37 @@ export const UserProfile = ({ profile, onProfileUpdate }: UserProfileProps) => {
           )}
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="phoneNumber">Phone Number</Label>
+          {isEditing ? (
+            <div className="space-y-1">
+              <Input
+                id="phoneNumber"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Enter your phone number"
+              />
+              <p className="text-xs text-muted-foreground">
+                This helps friends find you when they sync their contacts
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-2 bg-muted rounded-md">
+              <span className="text-foreground">
+                {(profile as any).phone_number || 'Not set'}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+
         {isEditing && (
           <div className="flex space-x-2">
             <Button
@@ -243,6 +278,7 @@ export const UserProfile = ({ profile, onProfileUpdate }: UserProfileProps) => {
               onClick={() => {
                 setIsEditing(false);
                 setFullName(profile.full_name);
+                setPhoneNumber((profile as any).phone_number || '');
               }}
             >
               Cancel

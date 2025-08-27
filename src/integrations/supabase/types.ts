@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           full_name: string
           id: string
+          phone_number: string | null
           updated_at: string
           user_id: string
         }
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           full_name: string
           id?: string
+          phone_number?: string | null
           updated_at?: string
           user_id: string
         }
@@ -36,7 +38,32 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          phone_number?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_contacts: {
+        Row: {
+          contact_name: string | null
+          contact_phone: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          contact_name?: string | null
+          contact_phone: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          contact_name?: string | null
+          contact_phone?: string
+          created_at?: string
+          id?: string
           user_id?: string
         }
         Relationships: []
@@ -46,7 +73,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_contact_matched_users: {
+        Args: { requesting_user_id: string }
+        Returns: {
+          avatar_url: string
+          contact_name: string
+          full_name: string
+          id: string
+          phone_number: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
