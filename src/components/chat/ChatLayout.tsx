@@ -5,6 +5,8 @@ import { AuthForm } from "../auth/AuthForm";
 import { UserList } from "./UserList";
 import { ChatWindow } from "./ChatWindow";
 import { ProfileModal } from "../profile/ProfileModal";
+import { Button } from "@/components/ui/button";
+import { Menu, X } from "lucide-react";
 import chartingBg from "@/assets/charting-bg.jpg";
 
 export interface Profile {
@@ -39,6 +41,7 @@ export const ChatLayout = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [selectedChat, setSelectedChat] = useState<User | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -142,6 +145,8 @@ export const ChatLayout = () => {
     };
 
     setMessages(prev => [...prev, newMessage]);
+    // Close mobile menu after sending message
+    setIsMobileMenuOpen(false);
   };
 
   const deleteMessage = (messageId: string) => {
@@ -170,7 +175,7 @@ export const ChatLayout = () => {
 
   return (
     <div 
-      className="flex h-screen bg-chat-bg relative"
+      className="flex h-screen bg-chat-bg relative overflow-hidden"
       style={{
         backgroundImage: `url(${chartingBg})`,
         backgroundSize: 'cover',
@@ -184,21 +189,64 @@ export const ChatLayout = () => {
           background: 'var(--gradient-overlay-light)'
         }}
       />
-      <UserList
-        users={users}
-        selectedUser={selectedChat}
-        onUserSelect={setSelectedChat}
-        currentUser={currentUser}
-        messages={messages}
-        onProfileClick={() => setIsProfileModalOpen(true)}
-      />
-      <ChatWindow
-        selectedUser={selectedChat}
-        messages={selectedChat ? getChatMessages(selectedChat.id) : []}
-        currentUser={currentUser}
-        onSendMessage={sendMessage}
-        onDeleteMessage={deleteMessage}
-      />
+      
+      {/* Mobile Header */}
+      <div className="md:hidden absolute top-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border">
+        <div className="flex items-center justify-between p-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-foreground"
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+          <h1 className="font-semibold text-foreground">
+            {selectedChat ? selectedChat.name : "QuickChat"}
+          </h1>
+          <div className="w-10" /> {/* Spacer for centering */}
+        </div>
+      </div>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="md:hidden absolute inset-0 bg-black/50 z-20"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+      
+      {/* User List - Desktop: always visible, Mobile: slide-in overlay */}
+      <div className={`
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        transition-transform duration-300 ease-in-out
+        absolute md:relative z-30 md:z-10
+        h-full md:h-auto
+        ${isMobileMenuOpen ? 'pt-16' : 'md:pt-0'}
+      `}>
+        <UserList
+          users={users}
+          selectedUser={selectedChat}
+          onUserSelect={(user) => {
+            setSelectedChat(user);
+            setIsMobileMenuOpen(false); // Close mobile menu when selecting user
+          }}
+          currentUser={currentUser}
+          messages={messages}
+          onProfileClick={() => setIsProfileModalOpen(true)}
+        />
+      </div>
+      
+      {/* Chat Window - Full width on mobile, flex-1 on desktop */}
+      <div className="flex-1 flex flex-col pt-16 md:pt-0">
+        <ChatWindow
+          selectedUser={selectedChat}
+          messages={selectedChat ? getChatMessages(selectedChat.id) : []}
+          currentUser={currentUser}
+          onSendMessage={sendMessage}
+          onDeleteMessage={deleteMessage}
+        />
+      </div>
       
       {profile && (
         <ProfileModal

@@ -65,7 +65,7 @@ export const UserList = ({
   };
 
   return (
-    <div className="w-80 bg-card/95 backdrop-blur-sm border-r border-border flex flex-col relative z-10">
+    <div className="w-80 md:w-80 bg-card/95 backdrop-blur-sm border-r border-border flex flex-col relative z-10 h-full">
       <div className="flex items-center gap-3 p-4 border-b border-border">
         <div className="relative">
           <Avatar className="h-12 w-12">
