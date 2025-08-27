@@ -1,73 +1,169 @@
-# Welcome to your Lovable project
+# AAMUSTED Chat Application
 
-## Project info
+A modern, real-time chat application built with React, TypeScript, and Supabase, featuring user authentication, profile management, and secure messaging.
 
-**URL**: https://lovable.dev/projects/038dbee9-a6a9-4724-b951-136880f73ae0
+## 🚀 Features
 
-## How can I edit this code?
+### Core Functionality
+- **Real-time Messaging**: Send and receive messages instantly
+- **User Authentication**: Secure sign-up and login with Supabase Auth
+- **Profile Management**: Customizable user profiles with avatar uploads
+- **Message Management**: Delete your own messages with hover controls
+- **Online Status**: See who's currently active
+- **Responsive Design**: Works seamlessly on desktop and mobile
 
-There are several ways of editing your application.
+### User Interface
+- **Modern Design**: Clean, intuitive interface with AAMUSTED brand colors
+- **Dark/Light Mode**: Automatic theme adaptation
+- **Profile Pictures**: Upload and manage your avatar
+- **Message Timestamps**: Track conversation history
+- **User List**: Browse all available users to chat with
 
-**Use Lovable**
+## 🎨 Design System
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/038dbee9-a6a9-4724-b951-136880f73ae0) and start prompting.
+The application uses AAMUSTED's official brand colors:
+- **Primary Green**: For main actions and branding
+- **Accent Gold**: For highlights and secondary elements
+- **Elegant Gradients**: Smooth transitions and overlays
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📱 How to Use
 
-**Use your preferred IDE**
+### Getting Started
+1. **Sign Up/Login**: Create an account or sign in with existing credentials
+2. **Complete Profile**: Add your name and upload a profile picture
+3. **Start Chatting**: Select a user from the list to begin messaging
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Managing Your Profile
+1. Click your profile picture in the user list
+2. Update your name and personal information
+3. Upload a new avatar (supports JPG, PNG, GIF up to 2MB)
+4. Remove your current picture if desired
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Messaging Features
+- **Send Messages**: Type your message and press Enter or click Send
+- **Delete Messages**: Hover over your messages to reveal the delete button
+- **View History**: Scroll through previous conversations
+- **Online Status**: Green dot indicates active users
 
-Follow these steps:
+## 🛠 Technical Stack
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Frontend
+- **React 18**: Modern React with hooks and functional components
+- **TypeScript**: Full type safety and better developer experience
+- **Vite**: Fast build tool and development server
+- **Tailwind CSS**: Utility-first CSS framework with custom design tokens
+- **shadcn/ui**: High-quality, accessible UI components
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Backend & Database
+- **Supabase**: Backend-as-a-Service with real-time capabilities
+- **PostgreSQL**: Robust relational database
+- **Row Level Security (RLS)**: Secure data access policies
+- **Supabase Storage**: File storage for profile pictures
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Key Libraries
+- **React Router**: Client-side routing
+- **React Hook Form**: Form state management
+- **Lucide React**: Beautiful, consistent icons
+- **Date-fns**: Date formatting and manipulation
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## 🔧 Development Setup
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn package manager
+- Supabase account
+
+### Installation
+```bash
+# Clone the repository
+git clone <repository-url>
+cd chat-app
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Add your Supabase credentials to .env
+
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment Variables
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📊 Database Schema
 
-**Use GitHub Codespaces**
+### Tables
+- **profiles**: User profile information and settings
+- **auth.users**: Supabase authentication (managed)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Storage
+- **avatars**: Public bucket for profile pictures
 
-## What technologies are used for this project?
+### Security
+- Row Level Security (RLS) enabled on all tables
+- Users can only access their own data
+- Profile pictures stored in public, secure bucket
 
-This project is built with:
+## 🚀 Deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Using Lovable (Recommended)
+1. Open your [Lovable Project](https://lovable.dev/projects/038dbee9-a6a9-4724-b951-136880f73ae0)
+2. Click "Share" → "Publish"
+3. Your app will be deployed automatically
 
-## How can I deploy this project?
+### Manual Deployment
+```bash
+# Build for production
+npm run build
 
-Simply open [Lovable](https://lovable.dev/projects/038dbee9-a6a9-4724-b951-136880f73ae0) and click on Share -> Publish.
+# Deploy the dist/ folder to your hosting service
+```
 
-## Can I connect a custom domain to my Lovable project?
+## 🔒 Security Features
 
-Yes, you can!
+- **Authentication**: Secure user registration and login
+- **Data Protection**: Row Level Security on all database operations
+- **File Upload Security**: Validated file types and size limits
+- **Real-time Security**: Secure WebSocket connections
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🧪 Testing
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```bash
+# Run type checking
+npm run type-check
+
+# Run linting
+npm run lint
+
+# Build production version
+npm run build
+```
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Commit your changes: `git commit -am 'Add new feature'`
+4. Push to the branch: `git push origin feature/new-feature`
+5. Submit a pull request
+
+## 📞 Support
+
+For issues and questions:
+1. Check the existing issues on GitHub
+2. Create a new issue with detailed information
+3. Contact the development team
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+Built with ❤️ using [Lovable](https://lovable.dev) - The fastest way to build web applications
