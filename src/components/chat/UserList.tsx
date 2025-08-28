@@ -108,7 +108,26 @@ export const UserList = ({
 
       <ScrollArea className="flex-1">
         <div className="p-2">
-          {users.map((user) => {
+          {users.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                <UserPlus className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold text-foreground">Find Friends</h3>
+                <p className="text-sm text-muted-foreground">
+                  Sync your contacts to find friends who are already using the app
+                </p>
+              </div>
+              {onContactSyncClick && (
+                <Button onClick={onContactSyncClick} className="w-full">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Sync Contacts
+                </Button>
+              )}
+            </div>
+          ) : (
+            users.map((user) => {
             const lastMessage = getLastMessage(user.id);
             const unreadCount = getUnreadCount(user.id);
             const isSelected = selectedUser?.id === user.id;
@@ -171,7 +190,8 @@ export const UserList = ({
                 </div>
               </div>
             );
-          })}
+          }))
+          }
         </div>
       </ScrollArea>
     </div>
