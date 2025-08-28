@@ -12,7 +12,6 @@ interface ChatWindowProps {
   messages: Message[];
   currentUser: User;
   onSendMessage: (content: string) => void;
-  onDeleteMessage: (messageId: string) => void;
 }
 
 export const ChatWindow = ({
@@ -20,7 +19,6 @@ export const ChatWindow = ({
   messages,
   currentUser,
   onSendMessage,
-  onDeleteMessage,
 }: ChatWindowProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -126,7 +124,7 @@ export const ChatWindow = ({
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           {messages.map((message) => {
-            const isOwn = message.senderId === currentUser.id;
+            const isOwn = message.sender_id === currentUser.id;
             return (
               <div
                 key={message.id}
@@ -153,19 +151,9 @@ export const ChatWindow = ({
                     <p className={`text-xs mt-1 ${
                       isOwn ? "text-chat-message-sent-text/70" : "text-chat-message-received-text/70"
                     }`}>
-                      {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+                      {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
                     </p>
                   </div>
-                  {isOwn && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDeleteMessage(message.id)}
-                      className={`absolute -top-2 -left-8 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-destructive/10 hover:bg-destructive/20 text-destructive hover:text-destructive`}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
                 </div>
               </div>
             );

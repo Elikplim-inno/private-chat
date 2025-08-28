@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import chartingBg from "@/assets/charting-bg.jpg";
 import { useContacts } from "@/hooks/useContacts";
+import { useMessages } from "@/hooks/useMessages";
 
 export interface Profile {
   id: string;
@@ -30,11 +31,11 @@ export interface User {
 
 export interface Message {
   id: string;
-  senderId: string;
-  receiverId: string;
+  sender_id: string;
+  receiver_id: string;
   content: string;
-  timestamp: Date;
-  isRead: boolean;
+  created_at: string;
+  is_read: boolean;
 }
 
 export const ChatLayout = () => {
@@ -47,54 +48,17 @@ export const ChatLayout = () => {
   const [showContactSync, setShowContactSync] = useState(false);
   const [contactMatchedUsers, setContactMatchedUsers] = useState<User[]>([]);
   const { getMatchedUsers } = useContacts(user?.id);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      senderId: "user2",
-      receiverId: "user1",
-      content: "Hey! How are you doing?",
-      timestamp: new Date(Date.now() - 300000),
-      isRead: true,
-    },
-    {
-      id: "2",
-      senderId: "user1",
-      receiverId: "user2",
-      content: "I'm doing great! Working on the new chat app project.",
-      timestamp: new Date(Date.now() - 240000),
-      isRead: true,
-    },
-    {
-      id: "3",
-      senderId: "user2",
-      receiverId: "user1",
-      content: "That sounds exciting! Can't wait to see it.",
-      timestamp: new Date(Date.now() - 180000),
-      isRead: true,
-    },
-  ]);
+  const { 
+    messages, 
+    sendMessage: sendMessageToDb, 
+    getChatMessages, 
+    getUnreadCount, 
+    getLastMessage,
+    markAsRead 
+  } = useMessages(user?.id);
 
-  // Combine demo users with contact-matched users
-  const demoUsers: User[] = [
-    {
-      id: "user2",
-      name: "Sarah Wilson",
-      isOnline: true,
-    },
-    {
-      id: "user3",
-      name: "Mike Johnson",
-      isOnline: false,
-      lastSeen: new Date(Date.now() - 3600000),
-    },
-    {
-      id: "user4",
-      name: "Emma Davis",
-      isOnline: true,
-    },
-  ];
-
-  const users: User[] = [...demoUsers, ...contactMatchedUsers];
+  // Only show contact-matched users (no demo users)
+  const users: User[] = contactMatchedUsers;
 
   useEffect(() => {
     // Set up auth state listener
@@ -163,34 +127,31 @@ export const ChatLayout = () => {
     }
   };
 
-  const sendMessage = (content: string) => {
+  const sendMessage = async (content: string) => {
     if (!user || !selectedChat) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      senderId: user.id,
-      receiverId: selectedChat.id,
-      content,
-      timestamp: new Date(),
-      isRead: false,
-    };
-
-    setMessages(prev => [...prev, newMessage]);
+    await sendMessageToDb(selectedChat.id, content);
     // Close mobile menu after sending message
     setIsMobileMenuOpen(false);
   };
 
-  const deleteMessage = (messageId: string) => {
-    setMessages(prev => prev.filter(msg => msg.id !== messageId));
-  };
-
-  const getChatMessages = (userId: string) => {
-    if (!user) return [];
-    return messages.filter(
-      msg =>
-        (msg.senderId === user.id && msg.receiverId === userId) ||
-        (msg.senderId === userId && msg.receiverId === user.id)
+  const handleUserSelect = async (selectedUser: User) => {
+    if (!user) return;
+    
+    setSelectedChat(selectedUser);
+    setIsMobileMenuOpen(false);
+    
+    // Mark messages from this user as read
+    const chatMessages = getChatMessages(selectedUser.id);
+    const unreadMessages = chatMessages.filter(msg => 
+      msg.sender_id === selectedUser.id && 
+      msg.receiver_id === user.id && 
+      !msg.is_read
     );
+    
+    for (const msg of unreadMessages) {
+      await markAsRead(msg.id);
+    }
   };
 
   if (!user || !profile) {
@@ -258,12 +219,11 @@ export const ChatLayout = () => {
         <UserList
           users={users}
           selectedUser={selectedChat}
-          onUserSelect={(user) => {
-            setSelectedChat(user);
-            setIsMobileMenuOpen(false); // Close mobile menu when selecting user
-          }}
+          onUserSelect={handleUserSelect}
           currentUser={currentUser}
-          messages={messages}
+          getChatMessages={getChatMessages}
+          getUnreadCount={getUnreadCount}
+          getLastMessage={getLastMessage}
           onProfileClick={() => setIsProfileModalOpen(true)}
           onContactSyncClick={() => setShowContactSync(true)}
         />
@@ -276,7 +236,6 @@ export const ChatLayout = () => {
           messages={selectedChat ? getChatMessages(selectedChat.id) : []}
           currentUser={currentUser}
           onSendMessage={sendMessage}
-          onDeleteMessage={deleteMessage}
         />
       </div>
       

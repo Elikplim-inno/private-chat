@@ -13,7 +13,9 @@ interface UserListProps {
   selectedUser: User | null;
   onUserSelect: (user: User) => void;
   currentUser: User;
-  messages: Message[];
+  getChatMessages: (userId: string) => Message[];
+  getUnreadCount: (userId: string) => number;
+  getLastMessage: (userId: string) => Message | null;
   onProfileClick: () => void;
   onContactSyncClick?: () => void;
 }
@@ -23,7 +25,9 @@ export const UserList = ({
   selectedUser,
   onUserSelect,
   currentUser,
-  messages,
+  getChatMessages,
+  getUnreadCount,
+  getLastMessage,
   onProfileClick,
   onContactSyncClick,
 }: UserListProps) => {
@@ -48,23 +52,7 @@ export const UserList = ({
       .toUpperCase()
       .slice(0, 2);
   };
-  const getLastMessage = (userId: string) => {
-    const userMessages = messages.filter(
-      msg =>
-        (msg.senderId === currentUser.id && msg.receiverId === userId) ||
-        (msg.senderId === userId && msg.receiverId === currentUser.id)
-    );
-    return userMessages[userMessages.length - 1];
-  };
-
-  const getUnreadCount = (userId: string) => {
-    return messages.filter(
-      msg =>
-        msg.senderId === userId &&
-        msg.receiverId === currentUser.id &&
-        !msg.isRead
-    ).length;
-  };
+  // These functions are now passed as props from ChatLayout
 
   return (
     <div className="w-80 md:w-80 bg-card/95 backdrop-blur-sm border-r border-border flex flex-col relative z-10 h-full">
@@ -156,7 +144,7 @@ export const UserList = ({
                       </h3>
                       {lastMessage && (
                         <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(lastMessage.timestamp, { addSuffix: true })}
+                          {formatDistanceToNow(new Date(lastMessage.created_at), { addSuffix: true })}
                         </span>
                       )}
                     </div>
@@ -164,7 +152,7 @@ export const UserList = ({
                     <div className="flex items-center justify-between">
                       {lastMessage ? (
                         <p className="text-sm text-muted-foreground truncate">
-                          {lastMessage.senderId === currentUser.id ? "You: " : ""}
+                          {lastMessage.sender_id === currentUser.id ? "You: " : ""}
                           {lastMessage.content}
                         </p>
                       ) : (
