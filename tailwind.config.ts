@@ -78,6 +78,18 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			boxShadow: {
+				'message': 'var(--shadow-message)',
+				'elevated': 'var(--shadow-elevated)',
+				'mobile': 'var(--shadow-mobile)'
+			},
+			spacing: {
+				'mobile-touch': 'var(--mobile-touch-target)',
+				'mobile-padding': 'var(--mobile-padding)',
+				'mobile-gap': 'var(--mobile-gap)',
+				'safe-area-inset-top': 'env(safe-area-inset-top)',
+				'safe-area-inset-bottom': 'env(safe-area-inset-bottom)'
+			},
 			keyframes: {
 				'accordion-down': {
 					from: {

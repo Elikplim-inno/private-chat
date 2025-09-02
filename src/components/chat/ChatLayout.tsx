@@ -177,20 +177,27 @@ export const ChatLayout = () => {
     >
       
       {/* Mobile Header */}
-      <div className="md:hidden absolute top-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-between p-4">
+      <div className="md:hidden absolute top-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border safe-area-inset-top">
+        <div className="flex items-center justify-between px-4 py-3 min-h-[56px]">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="text-foreground"
+            className="text-foreground h-11 w-11 rounded-full"
           >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
-          <h1 className="font-semibold text-foreground">
-            {selectedChat ? selectedChat.name : "QuickChat"}
-          </h1>
-          <div className="w-10" /> {/* Spacer for centering */}
+          <div className="flex-1 text-center">
+            <h1 className="font-semibold text-foreground text-lg truncate px-2">
+              {selectedChat ? selectedChat.name : "QuickChat"}
+            </h1>
+            {selectedChat && (
+              <p className="text-xs text-muted-foreground">
+                {selectedChat.isOnline ? "Online" : "Last seen recently"}
+              </p>
+            )}
+          </div>
+          <div className="w-11" /> {/* Spacer for centering */}
         </div>
       </div>
 
@@ -224,7 +231,7 @@ export const ChatLayout = () => {
       </div>
       
       {/* Chat Window - Full width on mobile, flex-1 on desktop */}
-      <div className="flex-1 flex flex-col pt-16 md:pt-0">
+      <div className="flex-1 flex flex-col pt-14 md:pt-0 pb-safe-area-inset-bottom">
         <ChatWindow
           selectedUser={selectedChat}
           messages={selectedChat ? getChatMessages(selectedChat.id) : []}
@@ -244,18 +251,19 @@ export const ChatLayout = () => {
       
       {showContactSync && user && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-lg max-w-md w-full">
-            <div className="flex items-center justify-between p-4 border-b">
+          <div className="bg-card rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-card">
               <h2 className="text-lg font-semibold">Find Friends</h2>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowContactSync(false)}
+                className="h-10 w-10 rounded-full"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </Button>
             </div>
-            <div className="p-4">
+            <div className="p-4 overflow-y-auto">
               <ContactSync 
                 userId={user.id} 
                 onContactsSync={() => {

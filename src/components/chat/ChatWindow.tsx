@@ -52,11 +52,11 @@ export const ChatWindow = ({
 
   if (!selectedUser) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-chat-bg">
-        <div className="text-center px-4">
-          <div className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-primary to-primary-glow rounded-full flex items-center justify-center mx-auto mb-4 opacity-20">
+      <div className="flex-1 flex items-center justify-center bg-chat-bg px-6">
+        <div className="text-center max-w-sm">
+          <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-primary/20 to-primary-glow/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg
-              className="w-8 h-8 md:w-12 md:h-12 text-primary-foreground"
+              className="w-10 h-10 md:w-12 md:h-12 text-primary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -69,12 +69,12 @@ export const ChatWindow = ({
               />
             </svg>
           </div>
-          <h3 className="text-lg md:text-xl font-semibold text-foreground mb-2">
+          <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3">
             Welcome to QuickChat
           </h3>
-          <p className="text-sm md:text-base text-muted-foreground">
-            <span className="md:hidden">Tap the menu to select a conversation</span>
-            <span className="hidden md:inline">Select a conversation to start messaging</span>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            <span className="md:hidden">Tap the menu button to select a conversation and start messaging</span>
+            <span className="hidden md:inline">Select a conversation from the sidebar to start messaging</span>
           </p>
         </div>
       </div>
@@ -141,14 +141,14 @@ export const ChatWindow = ({
                 )}
                 <div className="relative">
                   <div
-                    className={`max-w-[280px] sm:max-w-xs lg:max-w-md px-3 py-2 sm:px-4 rounded-2xl shadow-message ${
+                    className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-message ${
                       isOwn
                         ? "bg-chat-message-sent text-chat-message-sent-text rounded-br-md"
                         : "bg-chat-message-received text-chat-message-received-text rounded-bl-md"
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
-                    <p className={`text-xs mt-1 ${
+                    <p className="text-base leading-relaxed">{message.content}</p>
+                    <p className={`text-xs mt-2 ${
                       isOwn ? "text-chat-message-sent-text/70" : "text-chat-message-received-text/70"
                     }`}>
                       {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
@@ -163,22 +163,23 @@ export const ChatWindow = ({
       </ScrollArea>
 
       {/* Message Input */}
-      <div className="p-3 sm:p-4 border-t border-border bg-card/50 backdrop-blur-sm">
-        <div className="flex items-center space-x-2">
+      <div className="p-4 border-t border-border bg-card/95 backdrop-blur-sm safe-area-inset-bottom">
+        <div className="flex items-end space-x-3">
           <Input
             placeholder="Type a message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSend()}
-            className="flex-1 text-sm sm:text-base"
+            onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+            className="flex-1 text-base min-h-[44px] px-4 py-3 rounded-full border-2 focus:border-primary transition-colors"
+            autoComplete="off"
           />
           <Button
             onClick={handleSend}
             disabled={!newMessage.trim()}
             size="icon"
-            className="bg-gradient-to-r from-primary to-primary-glow hover:shadow-elevated transition-all duration-200 h-9 w-9 sm:h-10 sm:w-10"
+            className="bg-gradient-to-r from-primary to-primary-glow hover:shadow-elevated transition-all duration-200 h-11 w-11 rounded-full flex-shrink-0 active:scale-95"
           >
-            <Send className="h-3 w-3 sm:h-4 sm:w-4" />
+            <Send className="h-5 w-5" />
           </Button>
         </div>
       </div>
