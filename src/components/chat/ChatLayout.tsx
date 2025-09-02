@@ -8,7 +8,7 @@ import { ProfileModal } from "../profile/ProfileModal";
 import { ContactSync } from "./ContactSync";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import chartingBg from "@/assets/charting-bg.jpg";
+import chatBackground from "@/assets/chat-background.jpg";
 import { useContacts } from "@/hooks/useContacts";
 import { useMessages } from "@/hooks/useMessages";
 
@@ -167,20 +167,14 @@ export const ChatLayout = () => {
 
   return (
     <div 
-      className="flex h-screen bg-chat-bg relative overflow-hidden"
+      className="flex h-screen bg-background relative overflow-hidden"
       style={{
-        backgroundImage: `url(${chartingBg})`,
+        backgroundImage: `url(${chatBackground})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: 'var(--gradient-overlay-light)'
-        }}
-      />
       
       {/* Mobile Header */}
       <div className="md:hidden absolute top-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border">
